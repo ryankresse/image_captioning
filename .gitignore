@@ -1,0 +1,5 @@
+.ipynb_checkpoints/
+models/
+*.txt
+__pycache__/
+flikr8
