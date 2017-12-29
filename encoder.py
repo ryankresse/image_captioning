@@ -28,7 +28,6 @@ class Encoder(nn.Module):
         self.cnn = inception_v3(pretrained=True)
         for param in self.cnn.parameters(): 
             param.requires_grad = False
-        self.cnn.eval()
         if testing:
             pass # IS THIS RIGHT???
             #self.cnn.eval()

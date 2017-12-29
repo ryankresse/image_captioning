@@ -109,8 +109,6 @@ norm = transforms.Normalize(mean=mu,std=std)
 mu_rev = torch.FloatTensor(mu).unsqueeze(1).unsqueeze(1)
 std_rev = torch.FloatTensor(std).unsqueeze(1).unsqueeze(1)
 preproc = transforms.Compose([scaleCrop, transforms.ToTensor(), norm])
-#denorm = transforms.Lambda(lambda x: (x * torch.FloatTensor(std_rev)).expand_as(x) + torch.FloatTensor(mu_rev).expand_as(x))
-#revTrans = transforms.Compose([denorm, transforms.ToPILImage()])
 
 def denormF(x):
     std = torch.FloatTensor(std_rev).expand_as(x)
@@ -146,10 +144,34 @@ def padAndEOS(ids, maxlen=30):
     padded = padAndEOS(ids)
 
     
-def getCaps(ids):
+def getCaps(ids, id2w):
     caps = []
+ 
+
     for i in ids:
-        caps.append(turnId2W(i))
+        caps.append(turnId2W(i, id2w))
         #print()
         #print("\n")
     return caps
+
+
+def displayCapImg(preds, trues, imgs, id2w, num_img=5):
+    for i in range(num_img):
+        pred = preds[i, :]; true = trues[i,:]; img = imgs[i, :, :, :]
+        
+        print('true cap: {}'.format(turnId2W(true, id2w)))
+        print('predicted cap: {}'.format(turnId2W(pred, id2w)))
+        rev = revTrans(img)
+        plt.imshow(rev)
+        plt.show()
+
+        
+def sanityCheckInputs(imgs,ids, id2w, num_img=5):
+    for i in range(num_img):
+        img_ids = ids[i,:]; img = imgs[i, :, :, :]
+        print('cap: {}'.format(turnId2W(img_ids, id2w)))
+        rev = revTrans(img)
+        plt.imshow(rev)
+        plt.show()
+
+        
