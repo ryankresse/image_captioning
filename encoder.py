@@ -14,32 +14,31 @@ from glob import glob
 from torch.utils.data import DataLoader
 from PIL import Image
 from utils import *
-from encoder import *
-from gru_decoder import *
 
+if torch.cuda.is_available(): 
+    FLOAT_DTYPE = torch.cuda.FloatTensor
+else: 
+    FLOAT_DTYPE= torch.FloatTensor
 
 class Encoder(nn.Module):
-    def __init__(self, batch_size=32, emb_size=300, pool_size=8, fc_in_size=2048, testing=False):
+    def __init__(self, batch_size=32, emb_size=300, pool_size=8, fc_in_size=2048):
         super(Encoder, self).__init__()
-        self.batch_size=batch_size
-        self.emb_size= emb_size
+        self.batch_size = batch_size
+        self.emb_size = emb_size
         self.poolInput = nn.AvgPool2d(pool_size)
-        self.toEmbed = nn.Linear(fc_in_size, emb_size, bias=False)
+        self.linear = nn.Linear(fc_in_size, emb_size, bias=False)
         self.cnn = inception_v3(pretrained=True)
-        for param in self.cnn.parameters(): 
-            param.requires_grad = False
-        if testing:
-            pass # IS THIS RIGHT???
-            #self.cnn.eval()
-
+        self.bn = nn.BatchNorm1d(emb_size, momentum=0.1)
+        self.cnn.eval() # IS THIS RIGHT???
+        for param in self.cnn.parameters(): param.requires_grad = False
         targ_layer = self.cnn._modules.get('Mixed_7c')
-        self.out = torch.zeros([self.batch_size, fc_in_size, pool_size, pool_size]).type(FLOAT_DTYPE)
-        def fun(m, i, o): self.out.copy_(o.data)
+        self.cnn_out = torch.zeros([self.batch_size, fc_in_size, pool_size, pool_size]).type(FLOAT_DTYPE)
+        def fun(m, i, o): self.cnn_out.copy_(o.data)
         self.h = targ_layer.register_forward_hook(fun)
         
     def forward(self, x):
         _ = self.cnn(x)
-        x = self.poolInput(Variable(self.out))
+        x = self.poolInput(Variable(self.cnn_out))
         x = x.view(self.batch_size, -1)        
-        return F.tanh(self.toEmbed(x))
+        return self.bn(self.linear(x)) #BATCH NORM HERE? IF SO NEED TO CALL EVAL AT INFERENCE
     

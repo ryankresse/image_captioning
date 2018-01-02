@@ -11,15 +11,17 @@ from torch.autograd import Variable
 import re
 from os import path
 from glob import glob
+from torch.nn.utils.rnn import pack_padded_sequence
+
+
 from torch.utils.data import DataLoader
-import pdb
 from PIL import Image
 from utils import *
-from encoder import *
-from gru_decoder import *
-FLOAT_DTYPE = torch.cuda.FloatTensor
-LONG_DTYPE = torch.cuda.LongTensor
 
+if torch.cuda.is_available(): 
+    FLOAT_DTYPE = torch.cuda.FloatTensor
+else: 
+    FLOAT_DTYPE= torch.FloatTensor
 
 
 def create_emb_layer(emb_mat, non_trainable=True):
@@ -51,15 +53,13 @@ class GruDecoder(nn.Module):
         return F.log_softmax(self.out(x.squeeze(0))), hidden
     
     
-class DecoderLSTM(nn.Module):
+class LSTMDecoder(nn.Module):
     def __init__(self, embeds, num_layers):
         """Set the hyper-parameters and build the layers."""
-        super(DecoderLSTM, self).__init__()
+        super(LSTMDecoder, self).__init__()
         self.embed, self.emb_size, self.output_size = create_emb_layer(embeds, non_trainable=True)
-        #self.embed = nn.Embedding(vocab_size, embed_size)
-        self.lstm = nn.LSTM(self.embed_size, self.embed_size, num_layers, batch_first=True)
-        self.linear = nn.Linear(self.embed_size, self.output.size) ##NEED CROSS ENTROPY LOSS BC NO SOFTMAX
-    
+        self.lstm = nn.LSTM(self.emb_size, self.emb_size, num_layers, batch_first=True)
+        self.linear = nn.Linear(self.emb_size, self.output_size)
         
     def forward(self, features, captions, lengths):
         """Decode image feature vectors and generates captions."""
@@ -67,7 +67,7 @@ class DecoderLSTM(nn.Module):
         embeddings = torch.cat((features.unsqueeze(1), embeddings), 1)
         packed = pack_padded_sequence(embeddings, lengths, batch_first=True) 
         hiddens, _ = self.lstm(packed)
-        outputs = self.linear(hiddens[0]) ##NEED CROSS ENTROPY LOSS BC NO SOFTMAX
+        outputs = self.linear(hiddens[0]) 
         return outputs
     
     def sample(self, features, states=None):
@@ -77,9 +77,9 @@ class DecoderLSTM(nn.Module):
         for i in range(20):                                      # maximum sampling length
             hiddens, states = self.lstm(inputs, states)          # (batch_size, 1, hidden_size), 
             outputs = self.linear(hiddens.squeeze(1))            # (batch_size, vocab_size)
-            predicted = outputs.max(1)[1]
+            _, predicted = torch.topk(outputs,1, 1)
             sampled_ids.append(predicted)
             inputs = self.embed(predicted)
-            inputs = inputs.unsqueeze(1)                         # (batch_size, 1, embed_size)
+            #inputs = inputs.unsqueeze(1)                         # (batch_size, 1, embed_size)
         sampled_ids = torch.cat(sampled_ids, 1)                  # (batch_size, 20)
         return sampled_ids.squeeze()

@@ -174,4 +174,7 @@ def sanityCheckInputs(imgs,ids, id2w, num_img=5):
         plt.imshow(rev)
         plt.show()
 
-        
+def to_var(x, volatile=False):
+    if torch.cuda.is_available():
+        x = x.cuda()
+    return Variable(x, volatile=volatile)      
