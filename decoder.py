@@ -54,12 +54,14 @@ class GruDecoder(nn.Module):
     
     
 class LSTMDecoder(nn.Module):
-    def __init__(self, embeds, num_layers):
+    def __init__(self, vocab_size, emb_size, num_layers):
         """Set the hyper-parameters and build the layers."""
         super(LSTMDecoder, self).__init__()
-        self.embed, self.emb_size, self.output_size = create_emb_layer(embeds, non_trainable=True)
+        self.emb_size = emb_size
+        self.vocab_size = vocab_size
+        self.embed = nn.Embedding(vocab_size, self.emb_size)
         self.lstm = nn.LSTM(self.emb_size, self.emb_size, num_layers, batch_first=True)
-        self.linear = nn.Linear(self.emb_size, self.output_size)
+        self.linear = nn.Linear(self.emb_size, self.vocab_size)
         
     def forward(self, features, captions, lengths):
         """Decode image feature vectors and generates captions."""

@@ -177,4 +177,8 @@ def sanityCheckInputs(imgs,ids, id2w, num_img=5):
 def to_var(x, volatile=False):
     if torch.cuda.is_available():
         x = x.cuda()
-    return Variable(x, volatile=volatile)      
+    return Variable(x, volatile=volatile)
+
+def make_samp_caps(all_caps, img_dir):
+    names = [path.basename(x) for x in glob(img_dir)]
+    return [cap for cap in all_caps if cap[0] in names]
