@@ -21,7 +21,7 @@ else:
     FLOAT_DTYPE= torch.FloatTensor
 
 class Encoder(nn.Module):
-    def __init__(self, batch_size=32, emb_size=300, pool_size=8, fc_in_size=2048, dropout=0.75):
+    def __init__(self, batch_size=32, emb_size=300, pool_size=8, fc_in_size=2048, dropout=0.0):
         super(Encoder, self).__init__()
         self.batch_size = batch_size
         self.emb_size = emb_size
@@ -29,7 +29,8 @@ class Encoder(nn.Module):
         self.linear = nn.Linear(fc_in_size, emb_size, bias=False)
         self.cnn = inception_v3(pretrained=True)
         self.bn = nn.BatchNorm1d(emb_size, momentum=0.1)
-        self.do = nn.Dropout(dropout)
+        self.use_dropout = dropout > 0.0
+        if self.use_dropout: self.do = nn.Dropout(dropout)
         self.cnn.eval() # IS THIS RIGHT???
         for param in self.cnn.parameters(): param.requires_grad = False
         targ_layer = self.cnn._modules.get('Mixed_7c')
@@ -43,7 +44,7 @@ class Encoder(nn.Module):
         x = x.view(self.batch_size, -1)
         x = self.linear(x)
         x = self.bn(x)
-        x = self.do(x)
+        if self.use_dropout: x = self.do(x)
         return x #BATCH NORM AND DO HERE? IF SO NEED TO CALL EVAL AT INFERENCE
     
          

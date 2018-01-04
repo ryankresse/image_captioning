@@ -183,24 +183,23 @@ def make_samp_caps(all_caps, img_dir):
     names = [path.basename(x) for x in glob(img_dir)]
     return [cap for cap in all_caps if cap[0] in names]
 
-def displaySamples(imgs, caps, vocab):
-    for samp in range(caps.size()[0]):
+def displaySamples(imgs, pred, true, vocab):
+    for samp in range(pred.size()[0]):
         plt.imshow(revTrans(imgs[samp, :, :, :].data.cpu()))
         plt.show()
-        print(vocab.turnId2W(caps.data[samp].cpu().numpy()))
+        print('Predicted: {}'.format(vocab.turnId2W(pred.data[samp].cpu().numpy())))
+        print('True: {}'.format(vocab.turnId2W(true.data[samp].cpu().numpy())))
 
 def sampleBatch(enc, dec, loader):
     
     for i, (imgs, caps, ls) in enumerate(loader):
 
-        #dl.dataset.sanity(imgs, caps, ls)
+        loader.dataset.sanity(imgs, caps, ls)
         imgs = to_var(imgs); caps = to_var(caps) #VOLATILE ON IMGS MAYBE?
-        #targets = pack_padded_sequence(caps, ls, batch_first=True)[0]
-        enc.eval()
+        enc.eval(); dec.eval()
         imgs_enc = enc(imgs)
-        enc.train()
         samples = dec.sample(imgs_enc)
-
+        enc.train(); dec.train()
         break
         
-    return imgs, samples
+    return imgs, samples, caps

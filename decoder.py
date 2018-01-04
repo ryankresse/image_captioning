@@ -53,7 +53,7 @@ class GruDecoder(nn.Module):
     
     
 class LSTMDecoder(nn.Module):
-    def __init__(self, vocab_size, emb_size, num_layers, dropout=0.75):
+    def __init__(self, vocab_size, emb_size, num_layers, dropout=0.0):
         """Set the hyper-parameters and build the layers."""
         super(LSTMDecoder, self).__init__()
         self.emb_size = emb_size
