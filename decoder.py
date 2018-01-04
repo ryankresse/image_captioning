@@ -23,7 +23,6 @@ if torch.cuda.is_available():
 else: 
     FLOAT_DTYPE= torch.FloatTensor
 
-
 def create_emb_layer(emb_mat, non_trainable=True):
     emb_mat = torch.FloatTensor(emb_mat)
     output_size, emb_size = emb_mat.size() # get size
@@ -54,13 +53,13 @@ class GruDecoder(nn.Module):
     
     
 class LSTMDecoder(nn.Module):
-    def __init__(self, vocab_size, emb_size, num_layers):
+    def __init__(self, vocab_size, emb_size, num_layers, dropout=0.75):
         """Set the hyper-parameters and build the layers."""
         super(LSTMDecoder, self).__init__()
         self.emb_size = emb_size
         self.vocab_size = vocab_size
         self.embed = nn.Embedding(vocab_size, self.emb_size)
-        self.lstm = nn.LSTM(self.emb_size, self.emb_size, num_layers, batch_first=True)
+        self.lstm = nn.LSTM(self.emb_size, self.emb_size, num_layers, batch_first=True, dropout=dropout)
         self.linear = nn.Linear(self.emb_size, self.vocab_size)
         
     def forward(self, features, captions, lengths):

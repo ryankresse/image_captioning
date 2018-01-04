@@ -98,7 +98,7 @@ def collate_fn(data):
     return images, targets, lengths
 
 
-def get_loader(root, name_caps, vocab, transform=preproc, batch_size=4, shuffle=True, num_workers=-1):
+def get_loader(root, name_caps, vocab, transform=preproc, batch_size=4, shuffle=True, num_workers=-1, drop_last=True):
     """Returns torch.utils.data.DataLoader for custom coco dataset."""
     # flikr caption dataset
     flikr = FlikrDataset(root=root,
@@ -115,5 +115,6 @@ def get_loader(root, name_caps, vocab, transform=preproc, batch_size=4, shuffle=
                                               batch_size=batch_size,
                                               shuffle=shuffle,
                                               num_workers=num_workers,
-                                              collate_fn=collate_fn)
+                                              collate_fn=collate_fn,
+                                              drop_last=drop_last)
     return data_loader
