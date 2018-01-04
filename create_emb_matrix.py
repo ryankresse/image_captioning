@@ -21,7 +21,7 @@ import pickle
 PAD = 0; SOS = 1; EOS = 2; UNK=3
 
 embed_path = '/data/word_embed/glove.6B.300d.txt'
-glove_dict_path = '/data/word_embed/glove66.300d_dict.pkl'
+glove_dict_path = '/data/word_embed/glove6B.300d_dict.pkl'
 
 
 def load_glove_me(loc):

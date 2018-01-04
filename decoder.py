@@ -53,12 +53,15 @@ class GruDecoder(nn.Module):
     
     
 class LSTMDecoder(nn.Module):
-    def __init__(self, vocab_size, emb_size, num_layers, dropout=0.0):
+    def __init__(self, vocab_size, emb_size, num_layers, dropout=0.0, pre_tr_emb=None):
         """Set the hyper-parameters and build the layers."""
         super(LSTMDecoder, self).__init__()
         self.emb_size = emb_size
         self.vocab_size = vocab_size
-        self.embed = nn.Embedding(vocab_size, self.emb_size)
+        if pre_tr_emb is not None:
+            self.embed, _, _= create_emb_layer(pre_tr_emb)
+        else:
+            self.embed = nn.Embedding(vocab_size, self.emb_size)
         self.lstm = nn.LSTM(self.emb_size, self.emb_size, num_layers, batch_first=True, dropout=dropout)
         self.linear = nn.Linear(self.emb_size, self.vocab_size)
         

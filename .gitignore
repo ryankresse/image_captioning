@@ -3,3 +3,4 @@ models/
 *.txt
 __pycache__/
 flikr8
+*.pkl
