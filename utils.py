@@ -103,12 +103,14 @@ def padAndEOS(ids, maxlen=32):
     
 mu = [0.485, 0.456, 0.406]
 std = [0.229, 0.224, 0.225]
+
 scaleCrop = transforms.Compose([transforms.Scale(299), transforms.CenterCrop((299, 299))])
 
 norm = transforms.Normalize(mean=mu,std=std)
 mu_rev = torch.FloatTensor(mu).unsqueeze(1).unsqueeze(1)
 std_rev = torch.FloatTensor(std).unsqueeze(1).unsqueeze(1)
 preproc = transforms.Compose([scaleCrop, transforms.ToTensor(), norm])
+tr_trans = transforms.Compose([scaleCrop, transforms.RandomHorizontalFlip(), transforms.ToTensor(), norm])
 
 def denormF(x):
     std = torch.FloatTensor(std_rev).expand_as(x)

@@ -5,6 +5,7 @@ import os
 import pickle
 import numpy as np
 import nltk
+import pdb
 from PIL import Image
 import matplotlib.pyplot as plt
 from build_vocab import Vocabulary
@@ -24,10 +25,10 @@ class FlikrDataset(data.Dataset):
         """
         self.root = root
         self.name_caps = name_caps
-        self.names = [name_cap[0] for name_cap in name_caps]
-        self.caps = [name_cap[1] for name_cap in name_caps]
-        
-        #self.ids = list(self.coco.anns.keys())
+        self.names = list(name_caps.keys())
+        self.caps = list(name_caps.values())
+        #self.num_caps_per_img = len(self.caps[0])
+        self.cap_ix = np.random.randint(len(self.caps[0]))
         self.vocab = vocab
         self.transform = transform
     
@@ -35,15 +36,12 @@ class FlikrDataset(data.Dataset):
     
     def __getitem__(self, index):
         """Returns one data pair (image and caption)."""
-        #coco = self.coco
+        
         vocab = self.vocab
-        #ann_id = self.ids[index]
-        caption = self.caps[index]
+        #cap_ix = np.random.randint(low=0, high=self.num_caps_per_img)
+        #print(cap_ix)
+        caption = self.caps[index][self.cap_ix]
         path = self.names[index]
-        #caption = coco.anns[ann_id]['caption']
-        #img_id = coco.anns[ann_id]['image_id']
-        #path = coco.loadImgs(img_id)[0]['file_name']
-
         image = Image.open(os.path.join(self.root, path)).convert('RGB')
         if self.transform is not None:
             image = self.transform(image)

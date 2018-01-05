@@ -20,8 +20,6 @@ from PIL import Image
 import pickle
 PAD = 0; SOS = 1; EOS = 2; UNK=3
 
-embed_path = '/data/word_embed/glove.6B.300d.txt'
-glove_dict_path = '/data/word_embed/glove6B.300d_dict.pkl'
 
 
 def load_glove_me(loc):
@@ -31,7 +29,7 @@ def load_glove_me(loc):
         w2v[l[0]] = np.array(l[1:], dtype=np.float32)
     return w2v
 
-def create_emb_mat(targ_vocab, embed_path=embed_path, glove_dict_path=glove_dict_path, dim_em=300):
+def create_emb_mat(targ_vocab, embed_path, glove_dict_path, dim_em=300):
     if not path.exists(glove_dict_path):
         w2v = load_glove_me(embed_path)
         pickle.dump(w2v, open(glove_dict_path, 'wb'))

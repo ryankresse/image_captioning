@@ -31,12 +31,13 @@ def build_vocab(name_caps, threshold):
     """Build a simple vocabulary wrapper."""
     counter = Counter()
     #ids = coco.anns.keys()
-    for i, (name, cap) in enumerate(name_caps):
-        tokens = nltk.tokenize.word_tokenize(cap.lower())
-        counter.update(tokens)
+    for name, caps in name_caps.items():
+        for cap in caps:
+            tokens = nltk.tokenize.word_tokenize(cap.lower())
+            counter.update(tokens)
 
-        if i % 1000 == 0:
-            print("[%d/%d] Tokenized the captions." %(i, len(name_caps)))
+        #if i % 1000 == 0:
+            #print("[%d/%d] Tokenized the captions." %(i, len(name_caps)))
 
     # If the word frequency is less than 'threshold', then the word is discarded.
     words = [word for word, cnt in counter.items() if cnt >= threshold]
